@@ -173,7 +173,7 @@ bcmle=function(formula,data,cluster,dist)
   names(obs)=c(names(obsdata$x)[-1],names(obsdata$event),"event","time","cluster")
   ncl=obsdata$ncl
   nf=length(namesf)
-  Fact=matrix(unlist(obsdata$x[-1]),nrow(obsdata$x[-1]),nf)
+  if (nf!=0)  Fact=matrix(unlist(obsdata$x[-1]),nrow(obsdata$x[-1]),nf)
   pc=sum(obs$event)/nr
   sepc=sqrt(pc*(1-pc)/nr)
   km_fit <- survfit(Surv(time, event) ~ 1, data=obs)
