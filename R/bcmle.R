@@ -174,6 +174,12 @@ bcmle=function(formula,data,cluster,dist)
   ncl=obsdata$ncl
   nf=length(namesf)
   Fact=matrix(unlist(obsdata$x[-1]),nrow(obsdata$x[-1]),nf)
+  pc=sum(obs$event)/nr
+  sepc=sqrt(pc*(1-pc)/nr)
+  km_fit <- survfit(Surv(time, event) ~ 1, data=obs)
+  t=summary(km_fit)$time
+  sEmp=summary(km_fit)$surv
+  obs$event=1
   par0=c(0,0)
   if (nf>0)  par0=c(0,c(rep(0,nf)),0)
   if (!(dist=='Exponential')){
@@ -218,31 +224,21 @@ bcmle=function(formula,data,cluster,dist)
      }
      namVar=c(namVar,"$\\ln(\\sigma ^2)$","$b$")
    }
-   xTab=data.frame(piar,se,parcor)
-   colnames(xTab)=c("MLE","SE","Corrected MLE")
-   rownames(xTab)=namVar
-   xTab=xtable(xTab)
-   digits(xTab)=3
-   align(xTab)=c("l",rep("c",3))
-   xTab=print(xTab,sanitize.rownames.function=function(x){x})
   MeanCov=0
   if (nf>0){
   MeanCov=c(apply(Fact,2,mean))
   }
   Coxp=1
   if (nf>0) Coxp=exp(sum(MeanCov*para[2:(1+nf)]))
-  km_fit <- survfit(Surv(time, event) ~ 1, data=obs)
-  t=summary(km_fit)$time
-  sEmp=summary(km_fit)$surv
   if (dist=='Exponential') {
-    ae=exp(piar[1])*Coxp
+    ae=pc*exp(piar[1])*Coxp
     G2=exp(piar[nf+2])
-    acor=exp(parcor[1])*Coxp
+    acor=pc*exp(parcor[1])*Coxp
     G2cor=exp(parcor[nf+2])} else {
-    ae=exp(piar[1])*Coxp
+    ae=pc*exp(piar[1])*Coxp
     G2=exp(piar[nf+2])
     be=piar[nf+3]
-    acor=exp(parcor[1])*Coxp
+    acor=pc*exp(parcor[1])*Coxp
     G2cor=exp(parcor[nf+2])
     bcor=parcor[nf+3]
     }
@@ -255,5 +251,15 @@ bcmle=function(formula,data,cluster,dist)
     sEst=(1+G2*ae*(exp(be*t)-1))^(-1/G2)
     sCor=(1+G2cor*acor*(exp(bcor*t)-1))^(-1/G2cor)
   }
+  piar=c(piar,pc)
+  se=c(se,sepc)
+  parcor=c(parcor,pc)
+  xTab=data.frame(piar,se,parcor)
+  colnames(xTab)=c("MLE","SE","Corrected MLE")
+  rownames(xTab)=c(namVar,"Proportion of non-censored")
+  xTab=xtable(xTab)
+  digits(xTab)=3
+  align(xTab)=c("l",rep("c",3))
+  xTab=print(xTab,sanitize.rownames.function=function(x){x})
   return(list(dist=dist,parEst=piar,stErr=se,parCor=parcor,xTab=xTab,time=t,sEmp=sEmp,sEst=sEst,sCor=sCor))
 }
