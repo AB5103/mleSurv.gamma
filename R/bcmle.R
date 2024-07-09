@@ -174,12 +174,12 @@ bcmle=function(formula,data,cluster,dist)
   ncl=obsdata$ncl
   nf=length(namesf)
   if (nf!=0)  Fact=matrix(unlist(obsdata$x[-1]),nrow(obsdata$x[-1]),nf)
+  pcr=1
   pc=sum(obs$event)/nr
   sepc=sqrt(pc*(1-pc)/nr)
   km_fit <- survfit(Surv(time, event) ~ 1, data=obs)
   t=summary(km_fit)$time
   sEmp=summary(km_fit)$surv
-  obs$event=1
   par0=c(0,0)
   if (nf>0)  par0=c(0,c(rep(0,nf)),0)
   if (!(dist=='Exponential')){
@@ -231,14 +231,14 @@ bcmle=function(formula,data,cluster,dist)
   Coxp=1
   if (nf>0) Coxp=exp(sum(MeanCov*para[2:(1+nf)]))
   if (dist=='Exponential') {
-    ae=pc*exp(piar[1])*Coxp
+    ae=pcr*exp(piar[1])*Coxp
     G2=exp(piar[nf+2])
-    acor=pc*exp(parcor[1])*Coxp
+    acor=pcr*exp(parcor[1])*Coxp
     G2cor=exp(parcor[nf+2])} else {
-    ae=pc*exp(piar[1])*Coxp
+    ae=pcr*exp(piar[1])*Coxp
     G2=exp(piar[nf+2])
     be=piar[nf+3]
-    acor=pc*exp(parcor[1])*Coxp
+    acor=pcr*exp(parcor[1])*Coxp
     G2cor=exp(parcor[nf+2])
     bcor=parcor[nf+3]
     }
